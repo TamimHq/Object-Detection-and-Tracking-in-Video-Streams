@@ -69,7 +69,7 @@ Example:
 - Indicates stable training and good generalization
 
 ### 🔹 Confusion Matrix
-<p align="center"> <img src="Confusion_matrix.png" width="500"/> </p>
+<p align="center"> <img src="Results/Confusion_matrix.png" width="500"/> </p>
 
 - Strong diagonal → correct classifications
 - Minimal class confusion across dataset
