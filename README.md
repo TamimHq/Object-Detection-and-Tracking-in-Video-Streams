@@ -76,7 +76,7 @@ Example:
 
 ---
 ## 📁 Project Structure
-
+``` bash
 📦 object-detection-in-video
 │
 ├── Models/
@@ -94,7 +94,7 @@ Example:
 │   └── Confusion_matrix.png
 │
 └── README.md
-
+```
 ---
 
 ## ⚙️ Tech Stack
