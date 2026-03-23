@@ -73,8 +73,9 @@ Example:
 
 - Strong diagonal → correct classifications
 - Minimal class confusion across dataset
+
 ---
-## 🏗️ Project Structure
+## 📁 Project Structure
 
 📦 object-detection-in-video
 │
