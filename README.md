@@ -17,15 +17,15 @@ This repository contains an end-to-end machine learning pipeline designed to ing
 - Uses Ultralytics YOLO11m
 - Trained on COCO (80 classes)
 - Configuration:
- - Epochs: 100
- - Batch Size: 16
- - Image Size: 640
+  - Epochs: 100
+  - Batch Size: 16
+  - Image Size: 640
 ---
 ### 🔹 Multi-Object Tracking (ByteTrack)
 - Maintains persistent tracking IDs
 - Prevents:
- - Double counting
- - Frame-to-frame inconsistency
+  - Double counting
+  - Frame-to-frame inconsistency
 ---
 ### 🔹 ROI-Based Counting System
 - Defines a dynamic counting zone
