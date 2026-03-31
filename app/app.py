@@ -14,7 +14,7 @@ st.write("Upload a video to track and count objects passing through the center z
 st.info("💡 **Note:** This app runs on a standard cloud CPU. Processing may take a few minutes. For testing, please upload short clips (5-10 seconds)!")
 
 # --- LOAD MODEL ---
-# Using st.cache_resource ensures the model only loads once per session
+
 @st.cache_resource
 def load_model():
     return YOLO("Models/best.pt") 
