@@ -17,7 +17,7 @@ st.info("💡 **Note:** This app runs on a standard cloud CPU. Processing may ta
 # Using st.cache_resource ensures the model only loads once per session
 @st.cache_resource
 def load_model():
-    return YOLO("best.pt") 
+    return YOLO("Models/best.pt") 
 
 model = load_model()
 
