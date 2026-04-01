@@ -27,6 +27,7 @@ if uploaded_video is not None:
     
     # --- EXTRACT FIRST FRAME FOR PREVIEW (Optimized with Session State) ---
     if "video_name" not in st.session_state or st.session_state.video_name != uploaded_video.name:
+        st.session_state.processing_complete = False
         with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as tfile:
             tfile.write(uploaded_video.read())
             tmp_path = tfile.name
@@ -162,22 +163,42 @@ if uploaded_video is not None:
             ffmpeg_exe = imageio_ff.get_ffmpeg_exe()
             subprocess.run([ffmpeg_exe, "-y", "-i", raw_output_path, "-vcodec", "libx264", web_ready_output], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
-            st.success("Processing Complete!")
-            st.write("### Final Counts", class_counts)
-
-            # 7. Display Final Video and Download Buttons
-            st.video(web_ready_output)
+    
+            # Read the files into memory so they survive the app resetting
+            with open(web_ready_output, "rb") as f:
+                st.session_state.processed_video = f.read()
+            with open(csv_output_path, "rb") as f:
+                st.session_state.processed_csv = f.read()
             
-            col1, col2 = st.columns(2)
-            with col1:
-                with open(web_ready_output, "rb") as f:
-                    st.download_button("📥 Download Processed Video", f, file_name="counted_output.mp4", mime="video/mp4")
-            with col2:
-                with open(csv_output_path, "rb") as f:
-                    st.download_button("📥 Download CSV Data", f, file_name="total_counts.csv", mime="text/csv")
+            st.session_state.final_counts = class_counts
+            st.session_state.processing_complete = True
 
-            # Cleanup temp files
+            # Cleanup temp files safely now that data is in memory
             os.remove(video_path)
             os.remove(raw_output_path)
             os.remove(web_ready_output)
             os.remove(csv_output_path)
+
+# --- DISPLAY RESULTS AND DOWNLOADS ---
+if st.session_state.get('processing_complete', False):
+    st.success("✅ Processing Complete!")
+    st.write("### Final Counts", st.session_state.final_counts)
+
+
+    st.video(st.session_state.processed_video)
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.download_button(
+            label="📥 Download Processed Video", 
+            data=st.session_state.processed_video, 
+            file_name="counted_output.mp4", 
+            mime="video/mp4"
+        )
+    with col2:
+        st.download_button(
+            label="📥 Download CSV Data", 
+            data=st.session_state.processed_csv, 
+            file_name="total_counts.csv", 
+            mime="text/csv"
+        )
