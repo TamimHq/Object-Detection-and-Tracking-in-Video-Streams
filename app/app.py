@@ -14,7 +14,6 @@ st.write("Upload a video to track and count objects passing through the center z
 st.info("💡 **Note:** This app runs on a standard cloud CPU. Processing may take a few minutes. For testing, please upload short clips (5-10 seconds)!")
 
 # --- LOAD MODEL ---
-
 @st.cache_resource
 def load_model():
     return YOLO("Models/best.pt") 
@@ -25,9 +24,56 @@ model = load_model()
 uploaded_video = st.file_uploader("Upload Video File", type=['mp4', 'mov', 'avi'])
 
 if uploaded_video is not None:
-    st.video(uploaded_video) # Show original video
     
-    if st.button("Start Processing Video"):
+    # --- EXTRACT FIRST FRAME FOR PREVIEW (Optimized with Session State) ---
+    # We only read the first frame once to keep the sliders fast and prevent file lock crashes
+    if "video_name" not in st.session_state or st.session_state.video_name != uploaded_video.name:
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as tfile:
+            tfile.write(uploaded_video.read())
+            tmp_path = tfile.name
+        
+        cap = cv2.VideoCapture(tmp_path)
+        success, frame = cap.read()
+        st.session_state.width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        st.session_state.height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        st.session_state.fps = int(cap.get(cv2.CAP_PROP_FPS))
+        
+        if success:
+            # Convert BGR to RGB for Streamlit image display
+            st.session_state.first_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            
+        cap.release()
+        os.remove(tmp_path) # Clean up preview temp file immediately
+        st.session_state.video_name = uploaded_video.name
+        
+        # Reset the uploader read position so it can be read again during processing
+        uploaded_video.seek(0)
+
+    # --- DYNAMIC ZONE SETTINGS ---
+    st.write("### 🎛️ Adjust Counting Zone")
+    col1, col2 = st.columns(2)
+    with col1:
+        margin_x_pct = st.slider("Left/Right Margin (%)", min_value=0, max_value=45, value=5, step=1)
+    with col2:
+        margin_y_pct = st.slider("Top/Bottom Margin (%)", min_value=0, max_value=45, value=5, step=1)
+
+    # Calculate actual pixel margins based on slider percentages
+    margin_x = int(st.session_state.width * (margin_x_pct / 100.0))
+    margin_y = int(st.session_state.height * (margin_y_pct / 100.0))
+    
+    zone_x1, zone_y1 = margin_x, margin_y
+    zone_x2 = st.session_state.width - margin_x
+    zone_y2 = st.session_state.height - margin_y
+
+    # --- DISPLAY LIVE PREVIEW ---
+    if 'first_frame' in st.session_state:
+        preview_img = st.session_state.first_frame.copy()
+        cv2.rectangle(preview_img, (zone_x1, zone_y1), (zone_x2, zone_y2), (0, 255, 255), 4)
+        cv2.putText(preview_img, "Counting Zone Preview", (zone_x1 + 15, zone_y1 + 40), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 255, 255), 3)
+        st.image(preview_img, caption="Live Zone Preview (Adjust sliders above to change size)", use_container_width=True)
+
+    # --- PROCESSING BUTTON ---
+    if st.button("🚀 Start Processing Video"):
         with st.spinner("Processing video... This may take a few minutes."):
             
             # 1. Save uploaded video to a temporary file
@@ -45,22 +91,12 @@ if uploaded_video is not None:
 
             # 3. OpenCV Setup
             cap = cv2.VideoCapture(video_path)
-            width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-            height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-            fps = int(cap.get(cv2.CAP_PROP_FPS))
-            
             fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-            out = cv2.VideoWriter(raw_output_path, fourcc, fps, (width, height))
+            out = cv2.VideoWriter(raw_output_path, fourcc, st.session_state.fps, (st.session_state.width, st.session_state.height))
 
             counted_ids = set()
             class_counts = {}
             class_names = model.names
-
-            
-            margin_x = int(width * 0.05)
-            margin_y = int(height * 0.05)
-            zone_x1, zone_y1 = margin_x, margin_y
-            zone_x2, zone_y2 = width - margin_x, height - margin_y
 
             # 4. Processing Loop
             progress_bar = st.progress(0)
@@ -89,6 +125,7 @@ if uploaded_video is not None:
                         x1, y1, x2, y2 = box
                         cx, cy = int((x1 + x2) / 2), int((y1 + y2) / 2)
 
+                        # Use dynamic zone coordinates from the sliders
                         if zone_x1 < cx < zone_x2 and zone_y1 < cy < zone_y2:
                             if track_id not in counted_ids:
                                 counted_ids.add(track_id)
@@ -144,4 +181,4 @@ if uploaded_video is not None:
             os.remove(video_path)
             os.remove(raw_output_path)
             os.remove(web_ready_output)
-            os.remove(csv_output_path)  
+            os.remove(csv_output_path)
