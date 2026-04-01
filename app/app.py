@@ -56,7 +56,7 @@ if uploaded_video is not None:
             class_counts = {}
             class_names = model.names
 
-            # 5% margin as discussed previously
+            
             margin_x = int(width * 0.05)
             margin_y = int(height * 0.05)
             zone_x1, zone_y1 = margin_x, margin_y
@@ -73,7 +73,7 @@ if uploaded_video is not None:
                     break
 
                 frame_count += 1
-                if frame_count % 10 == 0: # Update progress bar every 10 frames
+                if frame_count % 10 == 0: 
                     progress_bar.progress(min(frame_count / total_frames, 1.0))
 
                 results = model.track(frame, persist=True, conf=0.35, tracker="bytetrack.yaml", verbose=False)
