@@ -1,5 +1,7 @@
 # 🎥 Object Detection & Tracking in Video Pipeline
 
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://objectdetectioninvideo.streamlit.app/)
+
 ## 📌 Overview
 This repository contains an end-to-end machine learning pipeline designed to ingest raw video feeds, detect and track specific objects, and export the tracking data into structured CSV reports. Built using the state-of-the-art YOLO11 architecture and ByteTrack algorithms, this project demonstrates how to transform unstructured computer vision data into actionable, quantifiable metrics suitable for enterprise reporting and analytics.
 
@@ -12,6 +14,11 @@ This repository contains an end-to-end machine learning pipeline designed to ing
 
 ---
 ## 🧠 Core Features
+
+### 🔹 Interactive Web Interface (Streamlit)
+- **Live Preview:** Extracts the first frame of the uploaded video to preview the counting zone.
+- **Dynamic Controls:** Users can adjust the counting ROI (Region of Interest) using percentage-based sliders.
+- **Cloud Hosted:** Fully deployable on Streamlit Community Cloud with headless OpenCV support.
 
 ### 🔹 Object Detection (YOLO11)
 - Uses Ultralytics YOLO11m
@@ -85,6 +92,10 @@ Example:
 ├── NoteBook/
 │   └── object_detection_in_video.ipynb
 │
+├── app/
+│   ├── app.py
+│   └── requirements.txt
+|
 ├── outputs/
 │   ├── web_ready_output.mp4
 │   └── total_counts.csv
@@ -93,7 +104,12 @@ Example:
 │   ├── Training_result.png
 │   └── Confusion_matrix.png
 │
+└──pacakges.txt
+│
+└── LICENSE
+│
 └── README.md
+
 ```
 ---
 
@@ -110,21 +126,28 @@ Example:
 
 ---
 ## 🚀 How to Run
+### Option 1: Live Web App (Recommended)
+You can test the application instantly without installing anything by visiting the live deployment:
+👉 [View Live App Here](https://objectdetectioninvideo.streamlit.app/)
 
+### Option 2: Run Locally (Streamlit Interface)
 ### 1️⃣ Clone Repository
 ```bash
 git clone https://github.com/TamimHq/ObjectDetectionInVideo
-cd traffic-analysis-pipeline
+cd ObjectDetectionInVideo
 ```
 ### 2️⃣ Install Dependencies
 ```bash
-pip install ultralytics roboflow opencv-python
+pip install -r requirements.txt
 ```
-### 3️⃣ Run Notebook
+### 3️⃣ Launch the App
 ```bash
-NoteBook/object_detection_in_video.ipynb
+streamlit run app.py
 ```
+### Option 3: Jupyter Notebook (Training & Evaluation)
+To retrain the model or view the raw evaluation pipeline:
 Run all cells to:
+- Open ```NoteBook/object_detection_in_video.ipynb.```
 - Train model (optional)
 - Evaluate performance
 - Process video
