@@ -153,7 +153,8 @@ if uploaded_video is not None:
                             track_states[track_id] = is_inside
                     
                         # draw center point
-                        cv2.circle(annotated_frame, (cx, cy), 5, (0, 0, 255), -1)
+                        dot_color = (0, 255, 0) if is_inside else (0, 0, 255)
+                        cv2.circle(annotated_frame, (cx, cy), 5, dot_color, -1)
 
                 cv2.rectangle(annotated_frame, (zone_x1, zone_y1), (zone_x2, zone_y2), (0, 255, 255), 2)
                 
